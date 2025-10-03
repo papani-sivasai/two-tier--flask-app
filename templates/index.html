@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Flask + MySQL To-Do</title>
+  <style>
+    :root {
+      --primary: #007bff;
+      --danger: #dc3545;
+      --success: #28a745;
+      --gray: #6c757d;
+    }
+    body {
+      font-family: system-ui, sans-serif;
+      background-color: #f7f8fa;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 600px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: var(--primary);
+    }
+    form.add-form {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    form.add-form input {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    form.add-form button {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    li.todo-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f0f2f5;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      border-radius: 5px;
+    }
+    .task-text.completed {
+      text-decoration: line-through;
+      color: var(--gray);
+    }
+    .buttons {
+      display: flex;
+      gap: 0.3rem;
+    }
+    .btn {
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+    }
+    .btn.toggle { color: var(--success); }
+    .btn.edit { color: var(--primary); }
+    .btn.delete { color: var(--danger); }
+    .edit-form {
+      display: flex;
+      gap: 0.3rem;
+      margin-top: 0.3rem;
+    }
+    .edit-form input {
+      flex: 1;
+      padding: 0.3rem;
+    }
+    .edit-form button {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📝 To-Do List</h1>
+
+    <form class="add-form" method="POST" action="/add">
+      <input type="text" name="task" placeholder="Add a new task..." required>
+      <button type="submit">Add</button>
+    </form>
+
+    <ul>
+      {% for todo in todos %}
+        <li class="todo-item">
+          <div>
+            <div class="task-text {% if todo.completed %}completed{% endif %}">
+              {{ todo.task }}
+            </div>
+
+            <!-- Edit form (inline) -->
+            <form class="edit-form" method="POST" action="/edit/{{ todo.id }}">
+              <input type="text" name="new_task" placeholder="Edit task..." required>
+              <button type="submit">Save</button>
+            </form>
+          </div>
+
+          <div class="buttons">
+            <form method="GET" action="/toggle/{{ todo.id }}">
+              <button class="btn toggle" title="Mark complete/incomplete">✔</button>
+            </form>
+            <button class="btn edit" title="Edit" onclick="toggleEditForm(this)">✏️</button>
+            <a href="/delete/{{ todo.id }}" class="btn delete" title="Delete">🗑</a>
+          </div>
+        </li>
+      {% else %}
+        <li><em>No tasks yet. Add your first!</em></li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <script>
+    // Toggle visibility of the inline edit form
+    function toggleEditForm(button) {
+      const todoItem = button.closest('.todo-item');
+      const editForm = todoItem.querySelector('.edit-form');
+      editForm.classList.toggle('visible');
+      if (editForm.classList.contains('visible')) {
+        editForm.style.display = 'flex';
+        editForm.querySelector('input').focus();
+      } else {
+        editForm.style.display = 'none';
+      }
+    }
+
+    // Hide all edit forms initially
+    document.querySelectorAll('.edit-form').forEach(form => {
+      form.style.display = 'none';
+    });
+  </script>
+</body>
+</html>
